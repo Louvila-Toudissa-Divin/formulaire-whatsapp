@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulaire WhatsApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchCountries();
+    });
+
+    async function fetchCountries() {
+      const countrySelect = document.getElementById("country");
+      try {
+        const res = await fetch("https://countriesnow.space/api/v0.1/countries/positions");
+        const data = await res.json();
+        data.data.forEach((country) => {
+          const option = document.createElement("option");
+          option.value = country.name;
+          option.textContent = country.name;
+          countrySelect.appendChild(option);
+        });
+      } catch (error) {
+        alert("Impossible de charger les pays.");
+      }
+    }
+
+    async function fetchCities() {
+      const country = document.getElementById("country").value;
+      const citySelect = document.getElementById("city");
+      citySelect.innerHTML = "<option>Chargement...</option>";
+
+      try {
+        const res = await fetch("https://countriesnow.space/api/v0.1/countries/cities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ country }),
+        });
+        const data = await res.json();
+        citySelect.innerHTML = "<option value=''>-- Sélectionnez une ville --</option>";
+        data.data.forEach((city) => {
+          const option = document.createElement("option");
+          option.value = city;
+          option.textContent = city;
+          citySelect.appendChild(option);
+        });
+      } catch (error) {
+        citySelect.innerHTML = "<option>Erreur de chargement</option>";
+      }
+    }
+
+    function redirectToWhatsApp() {
+      const name = document.getElementById("name").value.trim();
+      const profession = document.getElementById("profession").value.trim();
+      const country = document.getElementById("country").value.trim();
+      const city = document.getElementById("city").value.trim();
+
+      if (!name || !profession || !country || !city) {
+        alert("Veuillez remplir tous les champs.");
+        return;
+      }
+
+      const message = `Bonjour Mr Rogers LOUKIBI, je me prenomme Mr ${name},ayant pour profession ${profession} basé(e) au ${country}, précisement à ${city}. Je souhaite en savoir plus.`;
+      const encodedMessage = encodeURIComponent(message);
+      const phoneNumber = "+242055254266"; // ← Remplace par ton numéro
+      const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+      window.location.href = url;
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e6f2ff, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #25D366;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #1ebe5d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Contact WhatsApp</h2>
+    <input type="text" id="name" placeholder="Votre Nom d'utilisateur professionnel" required />
+    <input type="text" id="profession" placeholder="Votre profession" required />
+
+    <select id="country" onchange="fetchCities()" required>
+      <option value="">-- Sélectionnez un pays --</option>
+    </select>
+
+    <select id="city" required>
+      <option value="">-- Sélectionnez une ville --</option>
+    </select>
+
+    <button onclick="redirectToWhatsApp()">Envoyer le message</button>
+  </div>
+</body>
+</html>
